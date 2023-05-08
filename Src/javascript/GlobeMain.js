@@ -115,7 +115,7 @@ export default class Globe {
             else    
                 this.#context.moveTo(this.#centrePoint.x + drawPoint.xPoint , this.#centrePoint.y + drawPoint.yPoint);             
             
-            this.#context.fillRect(this.#centrePoint.x + drawPoint.xPoint , this.#centrePoint.y + drawPoint.yPoint,2,2);
+            //this.#context.fillRect(this.#centrePoint.x + drawPoint.xPoint , this.#centrePoint.y + drawPoint.yPoint,2,2);
 
             // The when mapPoint.move is true it is for the *NEXT* plot that should move, not this one
             lastPointMove = mapPoint.move;
