@@ -1,0 +1,13 @@
+# Visual Studio files C++ <files
+*.sln
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+x64
+
+# Javascript / Node.js files
+package.json
+package-lock.json
+.vscode
+public
+
