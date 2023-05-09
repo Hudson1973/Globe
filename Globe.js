@@ -20,10 +20,15 @@ export default class Globe {
         this.#canvas = canvas;
         this.#context = this.#canvas.getContext("2d");
 
+        // Set canvas to same size as the screen
+        this.#context.width = window.innerWidth;
+        this.#context.height = window.innerHeight;
+
         this.#centrePoint = {
             x: this.#canvas.width / 2,
             y: this.#canvas.height / 2,
         };
+
         this.radius = this.#initialiseRadius();
 
         this.loadMapData();
