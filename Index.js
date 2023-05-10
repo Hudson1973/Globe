@@ -1,6 +1,6 @@
-import Globe from './Globe.js';
+import Globe from './Src/JS/Globe.js';
 
 let cnvs = document.getElementById("globeCanvas");
 cnvs.width = window.innerWidth;
 cnvs.height = window.innerHeight;
-let myGlobe = new Globe(cnvs, "oldschool");
+const myGlobe = new Globe(cnvs);

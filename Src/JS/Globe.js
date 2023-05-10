@@ -20,7 +20,7 @@ export default class Globe {
     // Array that will hold the map point data
     mapData = [];
 
-    constructor(canvas, mode) {
+    constructor(canvas) {
         this.#canvas = canvas;
         this.#context = this.#canvas.getContext("2d");
 
