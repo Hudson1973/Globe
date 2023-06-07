@@ -20,8 +20,29 @@ function rotatePointAroundGlobe(globeTangentLat, globeTangentLong, pointLat, poi
     };
 }
 
+// This takes a point of longitude and latitude and the radius of the globe and returns 
+// a 3d vector (x, y, z) as a point on a sphere that's z,x,y centre is 0,0,0.
+// Latitude and longtitude 
+function gcsToCartesian(pointLat,pointLong, radius) {
+    const cosLatitude = Math.cos(inRadians(pointLat));
+
+    //const xPoint = Math.sin(inRadians(pointLong)) * cosLatitude * radius;
+    //const yPoint = cosLatitude * radius;
+    //const zPoint = Math.cos(inRadians(pointLong)) * cosLatitude * radius;
+
+    const xPoint = Math.cos(inRadians(pointLong)) * cosLatitude * radius * -1;
+    const zPoint = cosLatitude * Math.sin(inRadians(pointLong)) * radius;
+    const yPoint = Math.sin(inRadians(pointLat)) * radius * -1;
+
+    return {
+        'xPoint' : xPoint,
+        'yPoint' : yPoint,
+        'zPoint' : zPoint      
+    };
+}
+
 function inRadians (angleInDegrees) {
     return (angleInDegrees * Math.PI / 180);
 }
 
-export {rotatePointAroundGlobe};
+export {rotatePointAroundGlobe, gcsToCartesian}

@@ -1,9 +1,15 @@
 
 import {loadMap} from './GlobeLoadMap.js';
-import {rotatePointAroundGlobe} from './GlobeRotate.js';
+import {rotatePointAroundGlobe, gcsToCartesian} from './GlobeRotate.js';
+import TimestampToAngle from './GlobeSunRotation.js'; 
+import * as THREE from 'three';
 
 export default class Globe {
-    radius = 200;              // Remember # before a property means its private;
+    webGLisAvailable = true;
+    ambientLight = true;
+    handleKeyownEVents=true;
+
+    radius = 10;              // Remember # before a property means its private;
     TangentPoint = {
         Latitude: 0.00,
         Longitude: 0.00,
@@ -14,33 +20,59 @@ export default class Globe {
         x: 0,
         y: 0,
     };
+    mapSource = 'https://datahub.io/core/geo-countries/datapackage.json';
     #context = null;
     #canvas = null;
+
+    // three.js objects
+    #renderer = null;
+    #camera = null;
+    #scene = null;
+    #geometry = null;
+    #material = null;
+    #sphere = null;
+    #light = null;
+    #line = null;
+    //mapImageFile = 'Images/world_bluemarble.jpg';
+    mapImageFile = 'Images/2_no_clouds_4k.jpg';
+    //mapImageFile = 'Images/High-Resolution-World-Map.jpg';
+    mapImageLongRotation = 90;  // In degrees
+    #wireframe = null;
+    #globeGeometry = null;
 
     // Array that will hold the map point data
     mapData = [];
 
     constructor(canvas) {
         this.#canvas = canvas;
-        this.#context = this.#canvas.getContext("2d");
-
+    
         this.#centrePoint = {
             x: this.#canvas.width / 2,
             y: this.#canvas.height / 2,
         };
         this.radius = this.#initialiseRadius();
 
-        this.loadMapData();
+        // fail back
+        if (!this.webGLisAvailable)
+            this.#context = this.#canvas.getContext("2d");
+
+        this.#initGlobe();
         this.displayGlobe();
 
         // Add keydown listener
         document.addEventListener('keydown', e => this.keypressed(e), true); 
     }
 
+    get latitude() {
+        return this.latitudeGeo();
+    }
+
+    get longitude() {
+        return this.longitudeGeo();
+    }
+
     // Main keypress loop
     keypressed(ev) {
-        //console.log(this , ev);
-
         // SHIFT key pressed should do bigger changes than without
         switch (ev.key) {
             case 'ArrowUp':
@@ -59,36 +91,165 @@ export default class Globe {
         this.displayGlobe();
     }
 
+    #initGlobe() {
+        // Load map data from - well wherever. The data will be in geograohic
+        // coordinates (latitude [-90 -> 90], longitude [-180 -> 180]). 
+        // This data will be interpreted as points (a particular place), a
+        // series of points to make a line (a border) or a series of points to 
+        // make an enclosed area (the boundary of a country)
+        this.loadMapData(); // Need a callback here
+
+        // Work out where the sun should be
+        const sunAngle = TimestampToAngle(Date.now());
+        const sunDistance = 1500;
+        const earthAxis = 23.45 * Math.PI / 180;
+
+        // SUn position based on the date
+        const xSunPos = sunDistance * Math.sin(sunAngle);
+        const ySunPos = sunDistance * Math.cos(earthAxis) * Math.cos(sunAngle);
+        const zSunPos = sunDistance * Math.sin(sunAngle);
+
+        // Earth rotation, based on the time
+        const gmtTime = new Date();
+
+        if (this.webGLisAvailable){
+            // Three.js init 
+            this.#renderer = new THREE.WebGLRenderer({antialias: true, canvas: this.#canvas});
+
+            const fov = 60;
+            const aspect = window.innerWidth / window.innerHeight;  // the canvas default
+            const near = 10;
+            const far = 300;
+            this.#camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+            this.#camera.position.set(0,0, 100)
+            this.#camera.lookAt( 0, 0, 0 );
+            this.#scene = new THREE.Scene();
+
+            this.#material = new THREE.MeshPhongMaterial(); 
+            const textureLoader = new THREE.TextureLoader();
+            const earthTexture = textureLoader.load(this.mapImageFile);
+            this.#material.setValues({map: earthTexture});
+            
+            this.#geometry = new THREE.SphereGeometry( this.radius, 32, 16 ); 
+            this.#sphere = new THREE.Mesh( this.#geometry, this.#material ); 
+            this.#scene.add(this.#sphere);
+
+            // plot points on the three.gs globe
+            let lastPointMove = 0;
+            let arrIndex = 0;
+            let points = [];
+
+            let cartesianCoods = {
+                xPoint : 0,
+                yPoint : 0,
+                zPoint : 0 
+            }
+
+            console.log("Radius: " + this.radius);
+            //while(!lastPointMove) {
+            this.mapData.forEach((mapPoint) => {
+                // cartesianCoods are around a 0,0,0 origin, so csome will be -ve
+                cartesianCoods = gcsToCartesian(this.mapData[arrIndex].latitude, this.mapData[arrIndex].longitude, this.radius);
+                
+                lastPointMove = this.mapData[arrIndex].move;
+
+                points.push( new THREE.Vector3(cartesianCoods.xPoint, cartesianCoods.yPoint, cartesianCoods.zPoint));
+                // console.log( this.#centrePoint.x + cartesianCoods.xPoint + " " + this.#centrePoint.y + cartesianCoods.yPoint + " " + cartesianCoods.zPoint );
+                //console.log(  "Latitude: " + this.mapData[arrIndex].latitude + ", Longtitude: " + this.mapData[arrIndex].longitude +
+                //    ", x:" + cartesianCoods.xPoint + ", y:" + cartesianCoods.yPoint + ", z:" + cartesianCoods.zPoint );
+                arrIndex++;
+            });
+
+
+            const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+            const lineMaterial = new THREE.LineBasicMaterial( { color: 0xffff50, 
+                                                                linewidth: 1 } );
+            this.#line = new THREE.Line( lineGeometry, lineMaterial );
+
+            this.#scene.add( this.#line );
+
+            const color = 0xFFFFDD;
+            const intensity = 0.8;
+
+            if (this.ambientLight) {
+                this.#light = new THREE.DirectionalLight(color, intensity);
+                this.#light.position.set(0, 10, 100);
+            } else {
+                this.#light = new THREE.PointLight ( color, intensity, 50000);
+                this.#light.position.set(xSunPos, ySunPos, zSunPos);
+            }
+            
+            this.#scene.add(this.#light);
+
+            // Rotet globe to noon GMt (GMT longitude is x = 0 through globe)
+            this.#line.rotation.y = Math.PI /2;
+            this.#sphere.rotation.y = Math.PI + (this.mapImageLongRotation * Math.PI /180 );
+
+
+            this.TangentPoint.longitude = (gmtTime.getUTCHours() - 12) * 15;
+            console.log("minutes since midnight = " + gmtTime.getUTCHours() + " x 60 + " + gmtTime.getUTCMinutes() + " = ");
+            console.log("longitude: " + this.TangentPoint.longitude);
+
+            //this.animate();
+            
+            this.#renderer.render(this.#scene, this.#camera);
+            console.log(this.timestamp() + ' Rendering');
+        }
+    }
+
+    animate = () => {
+        requestAnimationFrame( this.animate );
+
+        this.#line.rotation.y += 0.01;
+	    this.#renderer.render( this.#scene, this.#camera );
+    }
+
     displayGlobe() {
-        this.#clearScreen();
-        this.#displayOutercircle();
-        this.#displayText();
-        this.#drawMap();
+        if(this.webGLisAvailable) {
+            this.#renderer.render( this.#scene, this.#camera );
+        } else {
+            this.#clearScreen();
+            this.#displayOutercircle();
+            this.#displayText();
+            this.#drawMap();
+        }
     }
 
     #initialiseRadius() {
         console.log('size is ' + this.#canvas.width + ' by ' + this.#canvas.height);
-        if (this.#canvas.width > this.#canvas.height) {
-            return (this.#canvas.height * .33);
+        if(this.webGLisAvailable) {
+            return 30;
         } else {
-            return (this.#canvas.width * .33);
-        }
+            if (this.#canvas.width > this.#canvas.height) {
+                return (this.#canvas.height * .33);
+            } else {
+                return (this.#canvas.width * .33);
+            }
+        }   
     }
 
     #displayOutercircle() {
-        this.#context.beginPath();
-        this.#context.arc(this.#centrePoint.x,this.#centrePoint.y,this.radius,0,2 * Math.PI);
-        this.#context.stroke();
+        if (!this.webGLisAvailable) {
+            this.#context.beginPath();
+            this.#context.arc(this.#centrePoint.x,this.#centrePoint.y,this.radius,0,2 * Math.PI);
+            this.#context.stroke();
+        }
     }
 
     #clearScreen() {
+       if (!this.webGLisAvailable)
         this. #context.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
     }
 
     #displayText() {
-        this.#context.font = "20px Arial";
-        this.#context.fillText("Lat:" + this.TangentPoint.Latitude , 26, 50);
-        this.#context.fillText("Long:" + this.TangentPoint.Longitude , 10, 80);
+        if (this.webGLisAvailable) {
+
+        }
+        else {
+            this.#context.font = "20px Arial";
+            this.#context.fillText("Lat:" + this.TangentPoint.Latitude , 26, 50);
+            this.#context.fillText("Long:" + this.TangentPoint.Longitude , 10, 80);
+        }
     }
 
     #drawMap() {
@@ -100,7 +261,9 @@ export default class Globe {
 
 
         // Get ready to draw
-        this.#context.beginPath();
+        if (!this.webGLisAvailable)
+            this.#context.beginPath();
+
         let lastPointMove = 0;
 
         // Read through every point in mapData and rotate it
@@ -110,20 +273,30 @@ export default class Globe {
 
             // Now draw this point, but check if the *LAST* point told it to move
             // And if the point is on the hemisphere that is facing the viewer
-            if (drawPoint.zPoint > 0 && !lastPointMove)
-                this.#context.lineTo(this.#centrePoint.x + drawPoint.xPoint , this.#centrePoint.y + drawPoint.yPoint);
-            else    
-                this.#context.moveTo(this.#centrePoint.x + drawPoint.xPoint , this.#centrePoint.y + drawPoint.yPoint);             
-            
-            //this.#context.fillRect(this.#centrePoint.x + drawPoint.xPoint , this.#centrePoint.y + drawPoint.yPoint,2,2);
+            if (this.webGLisAvailable) {
 
+            }
+            else {
+                if (drawPoint.zPoint > 0 && !lastPointMove)
+                    this.#context.lineTo(this.#centrePoint.x + drawPoint.xPoint , this.#centrePoint.y + drawPoint.yPoint);
+                else    
+                    this.#context.moveTo(this.#centrePoint.x + drawPoint.xPoint , this.#centrePoint.y + drawPoint.yPoint);           
+                
+                //this.#context.fillRect(this.#centrePoint.x + drawPoint.xPoint , this.#centrePoint.y + drawPoint.yPoint,2,2);
+            }
             // The when mapPoint.move is true it is for the *NEXT* plot that should move, not this one
             lastPointMove = mapPoint.move;
 
         });
-        this.#context.lineWidth = 1;
-        this.#context.strokeStyle = "blue";
-        this.#context.stroke();   
+
+        if (this.webGLisAvailable) {
+
+        }
+        else {
+            this.#context.lineWidth = 1;
+            this.#context.strokeStyle = "blue";
+            this.#context.stroke();   
+        }
     }
 
     #rotateNorth(bigRotation) {
@@ -146,20 +319,38 @@ export default class Globe {
     }
 
     #rotateWest(bigRotation) {
-        if(bigRotation)
+        if(bigRotation) {
             this.TangentPoint.Longitude -= this.bigRotationAngle;
-        else
+            if (this.webGLisAvailable) {
+                this.#sphere.rotation.y -= this.bigRotationAngle * Math.PI / 180;
+                this.#line.rotation.y -= this.bigRotationAngle * Math.PI / 180;
+            }
+        } else {
             this.TangentPoint.Longitude -= this.smallRotationAngle;
+            if (this.webGLisAvailable) {
+                this.#sphere.rotation.y -= this.smallRotationAngle * Math.PI / 180;
+                this.#line.rotation.y -= this.smallRotationAngle * Math.PI / 180;;
+            }
+        }
         
         if(this.TangentPoint.Longitude < -180)
             this.TangentPoint.Longitude += 360;
     }
 
     #rotateEast(bigRotation) {
-        if(bigRotation)
+        if(bigRotation) {
+            if (this.webGLisAvailable) {
+                this.#sphere.rotation.y += this.bigRotationAngle * Math.PI / 180;
+                this.#line.rotation.y += this.bigRotationAngle * Math.PI / 180;
+            }
             this.TangentPoint.Longitude += this.bigRotationAngle;
-        else
+        } else {
             this.TangentPoint.Longitude += this.smallRotationAngle;
+            if (this.webGLisAvailable) {
+                this.#sphere.rotation.y += this.smallRotationAngle * Math.PI / 180;;
+                this.#line.rotation.y += this.smallRotationAngle * Math.PI / 180;;
+            }
+        }
         
         if(this.TangentPoint.Longitude > 180)
             this.TangentPoint.Longitude -= 360;
@@ -167,5 +358,45 @@ export default class Globe {
 
     loadMapData() {
         this.mapData = loadMap();
+
+    }
+
+    timestamp() {
+        let now = new Date();
+        return '[' + now.getHours() + ':' + now.getMinutes() + ":" + now.getSeconds() + ':' + now.getMilliseconds() + ']';
+    }
+
+    latitudeGeo() {
+        const wholeDegree = Math.floor(this.TangentPoint.Latitude);
+        const positiveWholeDegree = Math.abs(wholeDegree);
+        let suffix = '';
+        const degreeSymbol = '\u00B0';
+
+        if (wholeDegree < 0) {
+            suffix = 'N';
+        } else if (wholeDegree > 0) {
+            suffix = 'S';
+        } else {
+            suffix = '';
+        }
+
+        return positiveWholeDegree + degreeSymbol + suffix;
+    }
+
+    longitudeGeo() {
+        const wholeDegree = Math.floor(this.TangentPoint.Longitude);
+        const positiveWholeDegree = Math.abs(wholeDegree);
+        let suffix = '';
+        const degreeSymbol = '\u00B0';
+
+        if (wholeDegree < 0) {
+            suffix = 'W';
+        } else if (wholeDegree > 0) {
+            suffix = 'E';
+        } else {
+            suffix = '';
+        }
+
+        return positiveWholeDegree + degreeSymbol + suffix;
     }
 }

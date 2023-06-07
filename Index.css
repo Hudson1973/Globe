@@ -1,0 +1,25 @@
+body { 
+    margin: 0; 
+}
+
+.displaytext {
+	position: absolute;
+	text-align: left;
+	z-index: 100;
+	display:block;
+    color: #4bd5ee;
+    font-family: "News Cycle", sans-serif;
+    font-size: 2vmin;
+    font-weight: 400;
+    line-height: 1.35;
+    width: 12em;   
+    left: 50px
+}
+
+#geoposition {
+    top: 1vmin;
+}
+
+#datetimenow {
+	top: 4vmin;
+}

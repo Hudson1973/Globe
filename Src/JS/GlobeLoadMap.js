@@ -1,4 +1,25 @@
-function loadMap() {
+function loadMap(mapSource) {
+    if(!mapSource || mapSource == "") {
+        return(basicMap());
+    } else {
+        try {
+            fetch(mapSource)
+                .then(function(response) { 
+                    return response.json();
+                })
+                .then(function(data) { 
+                    console.log(data);
+                })
+        } catch(err) {
+            console.log(err.message);
+            return null;
+        }
+
+    }
+    
+}
+
+function basicMap() {
     // This is a crude way of getting the data into an array.
     // TODO: use a database and serve up from the server
     let mapPoint = [];
