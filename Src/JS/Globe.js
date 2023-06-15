@@ -2,6 +2,8 @@
 import {loadMap} from './GlobeLoadMap.js';
 import {rotatePointAroundGlobe, gcsToCartesian} from './GlobeRotate.js';
 import TimestampToAngle from './GlobeSunRotation.js'; 
+import globeControlInit from './GlobeControl.js'; 
+
 import * as THREE from 'three';
 
 export default class Globe {
@@ -33,6 +35,10 @@ export default class Globe {
     #sphere = null;
     #light = null;
     #line = null;
+    #earthPointer = null;
+    #earthRaycaster = null;
+    objects = [];
+
     //mapImageFile = 'Images/world_bluemarble.jpg';
     mapImageFile = 'Images/2_no_clouds_4k.jpg';
     //mapImageFile = 'Images/High-Resolution-World-Map.jpg';
@@ -57,10 +63,9 @@ export default class Globe {
             this.#context = this.#canvas.getContext("2d");
 
         this.#initGlobe();
-        this.displayGlobe();
+        this.redrawGlobe();
 
-        // Add keydown listener
-        document.addEventListener('keydown', e => this.keypressed(e), true); 
+
     }
 
     get latitude() {
@@ -88,7 +93,20 @@ export default class Globe {
                 this.#rotateEast(ev.shiftKey);
                 break;
         }
-        this.displayGlobe();
+        this.redrawGlobe();
+    }
+
+    mousemoved(ev, canvas) {
+        const rect = canvas.getBoundingClientRect();
+        this.#earthPointer.x = (ev.clientX / window.innerWidth) * 2 -1;
+        this.#earthPointer.y = - (ev.clientY / window.innerHeight) * 2 + 1;
+        
+
+        this.#earthRaycaster.setFromCamera(this.#earthPointer, this.#camera);
+        const interects = this.#earthRaycaster.intersectObjects(this.objects);
+
+        console.log("x: " + this.#earthPointer.x + " , y: " + this.#earthPointer.y + " - " + interects.length);
+
     }
 
     #initGlobe() {
@@ -133,6 +151,7 @@ export default class Globe {
             this.#geometry = new THREE.SphereGeometry( this.radius, 32, 16 ); 
             this.#sphere = new THREE.Mesh( this.#geometry, this.#material ); 
             this.#scene.add(this.#sphere);
+            this.objects.push(this.#sphere);
 
             // plot points on the three.gs globe
             let lastPointMove = 0;
@@ -145,21 +164,13 @@ export default class Globe {
                 zPoint : 0 
             }
 
-            console.log("Radius: " + this.radius);
-            //while(!lastPointMove) {
             this.mapData.forEach((mapPoint) => {
-                // cartesianCoods are around a 0,0,0 origin, so csome will be -ve
+                // cartesianCoods are around a 0,0,0 origin, so some of them will be -ve
                 cartesianCoods = gcsToCartesian(this.mapData[arrIndex].latitude, this.mapData[arrIndex].longitude, this.radius);
-                
                 lastPointMove = this.mapData[arrIndex].move;
-
                 points.push( new THREE.Vector3(cartesianCoods.xPoint, cartesianCoods.yPoint, cartesianCoods.zPoint));
-                // console.log( this.#centrePoint.x + cartesianCoods.xPoint + " " + this.#centrePoint.y + cartesianCoods.yPoint + " " + cartesianCoods.zPoint );
-                //console.log(  "Latitude: " + this.mapData[arrIndex].latitude + ", Longtitude: " + this.mapData[arrIndex].longitude +
-                //    ", x:" + cartesianCoods.xPoint + ", y:" + cartesianCoods.yPoint + ", z:" + cartesianCoods.zPoint );
                 arrIndex++;
             });
-
 
             const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
             const lineMaterial = new THREE.LineBasicMaterial( { color: 0xffff50, 
@@ -167,6 +178,7 @@ export default class Globe {
             this.#line = new THREE.Line( lineGeometry, lineMaterial );
 
             this.#scene.add( this.#line );
+            this.objects.push(this.#line);
 
             const color = 0xFFFFDD;
             const intensity = 0.8;
@@ -191,9 +203,11 @@ export default class Globe {
             console.log("longitude: " + this.TangentPoint.longitude);
 
             //this.animate();
-            
             this.#renderer.render(this.#scene, this.#camera);
-            console.log(this.timestamp() + ' Rendering');
+
+            // Set up raycasting for mouse pointer conflicts with the earth
+            this.#earthPointer = new THREE.Vector2();
+            this.#earthRaycaster = new THREE.Raycaster();
         }
     }
 
@@ -204,7 +218,7 @@ export default class Globe {
 	    this.#renderer.render( this.#scene, this.#camera );
     }
 
-    displayGlobe() {
+    redrawGlobe() {
         if(this.webGLisAvailable) {
             this.#renderer.render( this.#scene, this.#camera );
         } else {

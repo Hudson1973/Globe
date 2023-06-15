@@ -45,4 +45,6 @@ function inRadians (angleInDegrees) {
     return (angleInDegrees * Math.PI / 180);
 }
 
+
+
 export {rotatePointAroundGlobe, gcsToCartesian}

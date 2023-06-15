@@ -12,7 +12,6 @@ myGlobe.handleKeyownEVents = false;     // This will handle key events for rotat
 document.getElementById("geoposition").innerHTML=myGlobe.latitude + " " + myGlobe.longitude;
 setInterval(updateDateTime, 1000);
 
-
 function keypressed(ev) {
     //console.log(this , ev);
 
@@ -42,5 +41,6 @@ function keypressed(ev) {
 function updateDateTime() {
         const nowDateTime = new Date();
         document.getElementById("datetimenow").innerHTML=nowDateTime;
+        myGlobe.redrawGlobe();
 }
 
