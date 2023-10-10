@@ -16,10 +16,46 @@ body {
     left: 50px
 }
 
+.starwarssun {
+    position: absolute;
+	text-align: left;
+	z-index: 100;
+	display:block;
+    color: #ffe81f;
+    font-family: "News Cycle", sans-serif;
+    font-size: 2vmin;
+    font-weight: 400;
+    line-height: 1.35;
+    width: 12em
+}
+
+.xWingFont {
+    position: absolute;
+	text-align: left;
+	z-index: 100;
+	display:block;
+    color: #f03309;
+    font-family: "News Cycle", sans-serif;
+    font-size: 2vmin;
+    font-weight: 400;
+    line-height: 1.35;
+    width: 12em
+}
+
 #geoposition {
-    top: 1vmin;
+    top: 0;
 }
 
 #datetimenow {
-	top: 4vmin;
+	top: 0;
+}
+
+#earthView {
+    bottom: 0;
+    left: 0;
+}
+
+#pointerDiagnostics {
+    top: 0;
+    right: 0;
 }

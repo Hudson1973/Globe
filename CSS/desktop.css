@@ -1,0 +1,26 @@
+@media only screen and (min-width: 1141px) {
+
+    h1 {
+        color: silver;
+    }
+
+    header, nav, .row, footer {
+        max-width: 1140px;
+        margin: 0 auto;   /* Centres everything on the page */
+    }
+
+    header {
+        padding-top:2em;
+        padding-bottom: 1em;
+    }
+
+    .displaytext {
+        font-size: larger;
+        width: 300px; 
+        padding: 20px;
+    }
+
+    #datetimenow {
+        top: 28px;
+    }
+}

@@ -41,10 +41,14 @@ function gcsToCartesian(pointLat,pointLong, radius) {
     };
 }
 
+function globeRadius(fovAngle, distance) {
+    return (Math.tan(inRadians(fovAngle/2)) * distance);
+}
+
 function inRadians (angleInDegrees) {
     return (angleInDegrees * Math.PI / 180);
 }
 
 
 
-export {rotatePointAroundGlobe, gcsToCartesian}
+export {rotatePointAroundGlobe, gcsToCartesian, globeRadius}

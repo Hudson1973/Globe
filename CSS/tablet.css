@@ -1,0 +1,10 @@
+@media only screen and (min-width: 641px) {
+
+    h1 {
+        color: green;
+    }
+
+    .displaytext {
+        font-size: 2vmin;
+    }
+}

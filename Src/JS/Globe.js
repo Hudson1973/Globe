@@ -1,14 +1,15 @@
 
 import {loadMap} from './GlobeLoadMap.js';
-import {rotatePointAroundGlobe, gcsToCartesian} from './GlobeRotate.js';
-import TimestampToAngle from './GlobeSunRotation.js'; 
-import globeControlInit from './GlobeControl.js'; 
+import {rotatePointAroundGlobe, gcsToCartesian, globeRadius} from './GlobeRotate.js';
+import TimestampToAngle from './GlobeSunRotation.js';  
+//import setInputEvents from './GlobeControl.js'; 
 
 import * as THREE from 'three';
 
 export default class Globe {
     webGLisAvailable = true;
     ambientLight = true;
+    showDiagnostics = true;
     handleKeyownEVents=true;
 
     radius = 10;              // Remember # before a property means its private;
@@ -37,6 +38,8 @@ export default class Globe {
     #line = null;
     #earthPointer = null;
     #earthRaycaster = null;
+    #fov = 46;                  // 46 degrees is the same as a 50mm lens
+    #distance = 35000;          // Km away from the earth (16323 fits screen height)
     objects = [];
 
     //mapImageFile = 'Images/world_bluemarble.jpg';
@@ -65,7 +68,23 @@ export default class Globe {
         this.#initGlobe();
         this.redrawGlobe();
 
+        // keydown event listener
+        document.addEventListener('keydown', e => this.onKeyPress(e), true); 
 
+        // Mouse events
+        document.addEventListener('mousemove', e => this.onMouseMove(e), false); 
+        /*document.addEventListener('mousedown', e => this.onMouseDown(e), false); 
+        document.addEventListener('mouseup', e => this.onMouseUp(e), false); 
+
+        // Mouse wheel events
+        document.addEventListener('wheel', e => this.onMouseWheel(e), false);  */
+
+        // Touch events
+        document.addEventListener('touchstart', e => this.onTouchStart(e), false);  
+        document.addEventListener('touchend', e => this.onTouchEnd(e), false); 
+        document.addEventListener('touchcancel', e => this.onTouchCancel(e), false); 
+        document.addEventListener('touchmove', e => this.onTouchMove(e), false); 
+        
     }
 
     get latitude() {
@@ -76,9 +95,27 @@ export default class Globe {
         return this.longitudeGeo();
     }
 
+    get screenHeight() {
+        return this.#canvas.height;
+    }
+
+    get globeRadius() {
+        return globeRadius(this.#fov, this.#distance);
+    }
+
+    get globeFOV() {
+        return this.#fov;
+    }
+
+    get globeDist() {
+        return Math.floor(this.#distance);
+    }
+
     // Main keypress loop
-    keypressed(ev) {
+    onKeyPress(ev) {
+        console.log(ev.key + " was pressed");
         // SHIFT key pressed should do bigger changes than without
+
         switch (ev.key) {
             case 'ArrowUp':
                 this.#rotateNorth(ev.shiftKey);
@@ -92,12 +129,24 @@ export default class Globe {
             case 'ArrowLeft':
                 this.#rotateEast(ev.shiftKey);
                 break;
+            case '=':
+                this.#dollyIn();
+                break;
+            case '-':
+                this.#dollyOut();
+                break;
+            case '+':
+                this.#dollyInFine();
+                break;
+            case '_':
+                this.#dollyOutFine();
+                break;
         }
         this.redrawGlobe();
     }
 
-    mousemoved(ev, canvas) {
-        const rect = canvas.getBoundingClientRect();
+    onMouseMove(ev) {
+        const rect = this.#canvas.getBoundingClientRect();
         this.#earthPointer.x = (ev.clientX / window.innerWidth) * 2 -1;
         this.#earthPointer.y = - (ev.clientY / window.innerHeight) * 2 + 1;
         
@@ -105,7 +154,7 @@ export default class Globe {
         this.#earthRaycaster.setFromCamera(this.#earthPointer, this.#camera);
         const interects = this.#earthRaycaster.intersectObjects(this.objects);
 
-        console.log("x: " + this.#earthPointer.x + " , y: " + this.#earthPointer.y + " - " + interects.length);
+        console.log("x: " + ev.clientX + " , y: " + ev.clientY + " - " + interects.length);
 
     }
 
@@ -134,12 +183,11 @@ export default class Globe {
             // Three.js init 
             this.#renderer = new THREE.WebGLRenderer({antialias: true, canvas: this.#canvas});
 
-            const fov = 60;
             const aspect = window.innerWidth / window.innerHeight;  // the canvas default
             const near = 10;
-            const far = 300;
-            this.#camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-            this.#camera.position.set(0,0, 100)
+            const far = 300000;
+            this.#camera = new THREE.PerspectiveCamera(this.#fov, aspect, near, far);
+            this.#camera.position.set(0,0, this.#distance);                     
             this.#camera.lookAt( 0, 0, 0 );
             this.#scene = new THREE.Scene();
 
@@ -211,6 +259,10 @@ export default class Globe {
         }
     }
 
+    #repositionCamera() {
+        this.#camera.position.set(0,0, this.#distance);  
+    }
+
     animate = () => {
         requestAnimationFrame( this.animate );
 
@@ -232,7 +284,7 @@ export default class Globe {
     #initialiseRadius() {
         console.log('size is ' + this.#canvas.width + ' by ' + this.#canvas.height);
         if(this.webGLisAvailable) {
-            return 30;
+            return 6371;                        // The radius of the earth in Km
         } else {
             if (this.#canvas.width > this.#canvas.height) {
                 return (this.#canvas.height * .33);
@@ -370,6 +422,30 @@ export default class Globe {
             this.TangentPoint.Longitude -= 360;
     }
 
+    #dollyIn(){
+        console.log("Dolly in");
+        this.#distance /= 1.1;
+        this.#repositionCamera();  
+    }
+
+    #dollyOut(){
+        console.log("Dolly out");
+        this.#distance *= 1.1;
+        this.#repositionCamera();
+    }
+
+    #dollyInFine(){
+        console.log("Dolly in");
+        this.#distance--;
+        this.#repositionCamera();  
+    }
+
+    #dollyOutFine(){
+        console.log("Dolly out");
+        this.#distance++;
+        this.#repositionCamera();
+    }
+
     loadMapData() {
         this.mapData = loadMap();
 
@@ -413,4 +489,5 @@ export default class Globe {
 
         return positiveWholeDegree + degreeSymbol + suffix;
     }
+
 }

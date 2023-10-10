@@ -10,6 +10,7 @@ cnvs.height = window.innerHeight;
 const myGlobe = new Globe(cnvs);
 myGlobe.handleKeyownEVents = false;     // This will handle key events for rotation
 document.getElementById("geoposition").innerHTML=myGlobe.latitude + " " + myGlobe.longitude;
+updateDiagnostics()
 setInterval(updateDateTime, 1000);
 
 function keypressed(ev) {
@@ -35,12 +36,30 @@ function keypressed(ev) {
             document.getElementById("geoposition").innerHTML=myGlobe.latitude + " " + myGlobe.longitude;
             console.log("Outside->Left. Long:" + myGlobe.longitude);
             break;
-    }
+        case '+':
+            updateDiagnostics()
+            break;
+        case '-':
+            updateDiagnostics()
+            break;
+        case '=':
+            updateDiagnostics()
+            break;
+        case '_':
+            updateDiagnostics();
+            break;
+}
 }
 
 function updateDateTime() {
         const nowDateTime = new Date();
         document.getElementById("datetimenow").innerHTML=nowDateTime;
         myGlobe.redrawGlobe();
+}
+
+function updateDiagnostics() {
+    document.getElementById("earthView").innerHTML="Radius: " + myGlobe.radius + "km<br>Field of view: " 
+        + myGlobe.globeFOV + "\u00B0<br>Distance: " + myGlobe.globeDist + "km";
+    document.getElementById("pointerDiagnostics").innerHTML="Screen height: " + myGlobe.screenHeight + " pixels";
 }
 
