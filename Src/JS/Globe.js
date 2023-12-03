@@ -2,15 +2,21 @@
 import {loadMap} from './GlobeLoadMap.js';
 import {rotatePointAroundGlobe, gcsToCartesian, globeRadius} from './GlobeRotate.js';
 import TimestampToAngle from './GlobeSunRotation.js';  
+import {GlobeEventController} from './GlobeEventController.js'
 //import setInputEvents from './GlobeControl.js'; 
 
 import * as THREE from 'three';
+import { GlobeGraphics } from './GlobeGraphics.js';
+import { initGlobePainting } from './GlobePainter.js';
 
 export default class Globe {
+    #globePainter = null;
     webGLisAvailable = true;
     ambientLight = true;
     showDiagnostics = true;
     handleKeyownEVents=true;
+
+    #controller = null;
 
     radius = 10;              // Remember # before a property means its private;
     TangentPoint = {
@@ -53,6 +59,8 @@ export default class Globe {
     mapData = [];
 
     constructor(canvas) {
+        console.log("Globe.constructor()");
+        this.#controller = new GlobeEventController();
         this.#canvas = canvas;
     
         this.#centrePoint = {
@@ -65,26 +73,25 @@ export default class Globe {
         if (!this.webGLisAvailable)
             this.#context = this.#canvas.getContext("2d");
 
-        this.#initGlobe();
-        this.redrawGlobe();
+
+        this.#globePainter = new GlobeGraphics(canvas);
+        console.log("this.#globePainter = GlobeGraphics()");
+        this.#globePainter.redrawScene();
+        console.log("this.#globePainter.redrawScene()");
+        if (!this.#globePainter)
+            // this.#initGlobe();
+            initGlobePainting(canvas);
 
         // keydown event listener
-        document.addEventListener('keydown', e => this.onKeyPress(e), true); 
+        /*document.addEventListener('keydown', e => this.onKeyPress(e), true); 
 
         // Mouse events
         document.addEventListener('mousemove', e => this.onMouseMove(e), false); 
-        /*document.addEventListener('mousedown', e => this.onMouseDown(e), false); 
+        document.addEventListener('mousedown', e => this.onMouseDown(e), false); 
         document.addEventListener('mouseup', e => this.onMouseUp(e), false); 
 
         // Mouse wheel events
-        document.addEventListener('wheel', e => this.onMouseWheel(e), false);  */
-
-        // Touch events
-        document.addEventListener('touchstart', e => this.onTouchStart(e), false);  
-        document.addEventListener('touchend', e => this.onTouchEnd(e), false); 
-        document.addEventListener('touchcancel', e => this.onTouchCancel(e), false); 
-        document.addEventListener('touchmove', e => this.onTouchMove(e), false); 
-        
+        document.addEventListener('wheel', e => this.onMouseWheel(e), false);     */ 
     }
 
     get latitude() {
@@ -142,7 +149,7 @@ export default class Globe {
                 this.#dollyOutFine();
                 break;
         }
-        this.redrawGlobe();
+        this.#globePainter.redrawGlobe();
     }
 
     onMouseMove(ev) {
@@ -157,6 +164,19 @@ export default class Globe {
         console.log("x: " + ev.clientX + " , y: " + ev.clientY + " - " + interects.length);
 
     }
+
+    onMouseDown(ev) {
+
+    }
+
+    onMouseUp(ev) {
+
+    }
+
+    onMouseWheel(ev) {
+
+    }
+
 
     #initGlobe() {
         // Load map data from - well wherever. The data will be in geograohic
@@ -272,7 +292,10 @@ export default class Globe {
 
     redrawGlobe() {
         if(this.webGLisAvailable) {
-            this.#renderer.render( this.#scene, this.#camera );
+            if (this.#globePainter)
+               this.#globePainter.redrawGlobe();
+            else
+                this.#renderer.render( this.#scene, this.#camera );
         } else {
             this.#clearScreen();
             this.#displayOutercircle();

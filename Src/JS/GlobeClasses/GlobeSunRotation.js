@@ -13,7 +13,7 @@ function TimestampToAngle(dateTime) {
     // Check validity of dateTime
     // 1) is there a value
     // 2) Is it a valid timestamp
-    console.log(dateTime.toDateString);
+
 /*     if(!isDate(dateTime))
         throw 'TimestampToAngle requires a date'; */
 

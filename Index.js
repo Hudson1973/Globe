@@ -1,15 +1,15 @@
-import Globe from './Src/JS/Globe.js';
-
-
+import Globe from './Src/JS/GlobeClasses/Globe.js';
 
 // Add keydown listener
 document.addEventListener('keydown', e => keypressed(e)); 
 let cnvs = document.getElementById("globeCanvas");
 cnvs.width = window.innerWidth;
 cnvs.height = window.innerHeight;
+
+//const myGraphics = new GlobeGraphics(cnvs);
+//myGraphics.redrawScene();
 const myGlobe = new Globe(cnvs);
-myGlobe.handleKeyownEVents = false;     // This will handle key events for rotation
-document.getElementById("geoposition").innerHTML=myGlobe.latitude + " " + myGlobe.longitude;
+document.getElementById("geoposition").innerHTML=myGlobe.view.latitude + " " + myGlobe.view.longitude;
 updateDiagnostics()
 setInterval(updateDateTime, 1000);
 
@@ -29,12 +29,10 @@ function keypressed(ev) {
         case 'ArrowRight':
             //this.#rotateWest(ev.shiftKey);
             document.getElementById("geoposition").innerHTML=myGlobe.latitude + " " + myGlobe.longitude;
-            console.log("Outside->Right. Long:" + myGlobe.longitude);
             break;
         case 'ArrowLeft':
             //this.#rotateEast(ev.shiftKey);
             document.getElementById("geoposition").innerHTML=myGlobe.latitude + " " + myGlobe.longitude;
-            console.log("Outside->Left. Long:" + myGlobe.longitude);
             break;
         case '+':
             updateDiagnostics()
@@ -58,8 +56,7 @@ function updateDateTime() {
 }
 
 function updateDiagnostics() {
-    document.getElementById("earthView").innerHTML="Radius: " + myGlobe.radius + "km<br>Field of view: " 
-        + myGlobe.globeFOV + "\u00B0<br>Distance: " + myGlobe.globeDist + "km";
-    document.getElementById("pointerDiagnostics").innerHTML="Screen height: " + myGlobe.screenHeight + " pixels";
+    document.getElementById("earthView").innerHTML="Radius: " + myGlobe.view.radius + "km<br>Field of view: " 
+        + myGlobe.view.fieldOfView + "\u00B0<br>Distance: " + myGlobe.view.distance + "km";
+    document.getElementById("pointerDiagnostics").innerHTML="Screen height: " + window.innerHeight + " pixels";
 }
-

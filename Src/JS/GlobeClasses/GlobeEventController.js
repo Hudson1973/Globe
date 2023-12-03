@@ -1,5 +1,45 @@
+import { InputEventController } from './Proto/InputEventController.js';
 
-function setInputEvents (canvas) {
+
+export class GlobeEventController extends InputEventController {
+    constructor() {
+        super();
+    }
+
+    onKeyPress(ev) {
+        super.onKeyPress(ev);
+
+        switch (ev.key) {
+            case 'ArrowUp':
+                //this.#rotateNorth(ev.shiftKey);
+                break;
+            case 'ArrowDown':
+                //this.#rotateSouth(ev.shiftKey);
+                break;
+            case 'ArrowRight':
+                //this.#rotateWest(ev.shiftKey);
+                break;
+            case 'ArrowLeft':
+                //this.#rotateEast(ev.shiftKey);
+                break;
+            case '=':
+                // Dolly in
+                break;
+            case '-':
+                // Dolly out
+                break;
+            case '+':
+                // Dolly in fine
+                break;
+            case '_':
+                // Dolly out fine
+                break;
+        }
+    }
+
+}
+
+/*function setInputEvents (canvas) {
     // keydown event listener
     // document.addEventListener('keydown', e => this.onKeyPress(e), true); 
 
@@ -91,6 +131,6 @@ function processTouch(touch) {
     this.ongoingTouches[this.numberOfFingers] = fingerTouch;
 
     this.numberOfFingers++;
-}
+}*/
 
-export {setInputEvents as default, onMouseMove, onMouseDown, onMouseUp, onMouseWheel, onTouchStart, onTouchEnd, onTouchCancel, onTouchMove};
+//export {setInputEvents as default, onMouseMove, onMouseDown, onMouseUp, onMouseWheel, onTouchStart, onTouchEnd, onTouchCancel, onTouchMove};
