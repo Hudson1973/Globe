@@ -2,8 +2,11 @@ import { InputEventController } from './Proto/InputEventController.js';
 
 
 export class GlobeEventController extends InputEventController {
-    constructor() {
+    #view = null
+
+    constructor(globeView) {
         super();
+        this.#view = globeView;
     }
 
     onKeyPress(ev) {
@@ -11,16 +14,16 @@ export class GlobeEventController extends InputEventController {
 
         switch (ev.key) {
             case 'ArrowUp':
-                //this.#rotateNorth(ev.shiftKey);
+                this.#view.rotateNorth();
                 break;
             case 'ArrowDown':
-                //this.#rotateSouth(ev.shiftKey);
+                this.#view.rotateSouth();
                 break;
             case 'ArrowRight':
-                //this.#rotateWest(ev.shiftKey);
+                this.#view.rotateEast();
                 break;
             case 'ArrowLeft':
-                //this.#rotateEast(ev.shiftKey);
+                this.#view.rotateWest();
                 break;
             case '=':
                 // Dolly in

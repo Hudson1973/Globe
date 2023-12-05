@@ -4,8 +4,9 @@ export class GlobePainter {
     #renderer = null;
     #scene = null;
     #camera = null;
+    #globe = null;
 
-    constructor(canvas, earthView, options) {
+    constructor(canvas, options) {
         console.log("GlobePainter.constructor()");
         this.#renderer = new THREE.WebGLRenderer({antialias: true, canvas: canvas});
         this.#scene = new THREE.Scene();
@@ -25,8 +26,8 @@ export class GlobePainter {
                 bumpScale: 200.0
             });
         }
-        const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
-        this.#scene.add(earthMesh);
+        this.#globe = new THREE.Mesh(earthGeometry, earthMaterial);
+        this.#scene.add(this.#globe);
 
         // Shine a light on it   
         if (options.ambientLight) {
@@ -48,10 +49,13 @@ export class GlobePainter {
         this.#camera.position.z = 35000;
         
         this.redrawScene();
-
     }
 
     redrawScene() {
          this.#renderer.render( this.#scene, this.#camera );
+    }
+    rotateGlobe(longitudeRotationAngle) {
+        this.#globe.rotation.y += longitudeRotationAngle * Math.PI /180 ;
+        this.redrawScene();
     }
 }

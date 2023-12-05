@@ -1,4 +1,5 @@
 import Globe from './Src/JS/GlobeClasses/Globe.js';
+import TextFormatHelpers from './Src/JS/GlobeClasses/TextFormatHelpers.js';
 
 // Add keydown listener
 document.addEventListener('keydown', e => keypressed(e)); 
@@ -9,7 +10,7 @@ cnvs.height = window.innerHeight;
 //const myGraphics = new GlobeGraphics(cnvs);
 //myGraphics.redrawScene();
 const myGlobe = new Globe(cnvs);
-document.getElementById("geoposition").innerHTML=myGlobe.view.latitude + " " + myGlobe.view.longitude;
+document.getElementById("geoposition").innerHTML=TextFormatHelpers.latitudeGCS(myGlobe.View.latitude) + " " + TextFormatHelpers.longitudeGCS(myGlobe.View.longitude);
 updateDiagnostics()
 setInterval(updateDateTime, 1000);
 
@@ -28,11 +29,13 @@ function keypressed(ev) {
             break;
         case 'ArrowRight':
             //this.#rotateWest(ev.shiftKey);
-            document.getElementById("geoposition").innerHTML=myGlobe.latitude + " " + myGlobe.longitude;
+            document.getElementById("geoposition").innerHTML=TextFormatHelpers.latitudeGCS(myGlobe.View.latitude) + 
+                " " + TextFormatHelpers.longitudeGCS(myGlobe.View.longitude);
             break;
         case 'ArrowLeft':
             //this.#rotateEast(ev.shiftKey);
-            document.getElementById("geoposition").innerHTML=myGlobe.latitude + " " + myGlobe.longitude;
+            document.getElementById("geoposition").innerHTML=TextFormatHelpers.latitudeGCS(myGlobe.View.latitude) + 
+                " " + TextFormatHelpers.longitudeGCS(myGlobe.View.longitude);
             break;
         case '+':
             updateDiagnostics()
@@ -56,7 +59,7 @@ function updateDateTime() {
 }
 
 function updateDiagnostics() {
-    document.getElementById("earthView").innerHTML="Radius: " + myGlobe.view.radius + "km<br>Field of view: " 
-        + myGlobe.view.fieldOfView + "\u00B0<br>Distance: " + myGlobe.view.distance + "km";
+    document.getElementById("earthView").innerHTML="Radius: " + myGlobe.View.radius + "km<br>Field of view: " 
+        + myGlobe.View.fieldOfView + TextFormatHelpers.degreeSymbol() + "<br>Distance: " + myGlobe.View.distance + "km";
     document.getElementById("pointerDiagnostics").innerHTML="Screen height: " + window.innerHeight + " pixels";
 }

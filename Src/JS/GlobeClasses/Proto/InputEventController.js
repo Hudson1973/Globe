@@ -3,7 +3,7 @@ class InputEventController {
 
     constructor () {
         // keydown event listener
-        document.addEventListener('keydown', e => this.onKeyPress(e), true); 
+        document.addEventListener('keydown', e => this.onKeyPress(e), false); 
 
         // Mouse events
         document.addEventListener('mousemove', e => this.onMouseMove(e), false); 
@@ -21,11 +21,11 @@ class InputEventController {
     }
 
     onKeyPress(ev) {
-
+        console.log("proto keypress");
     }
     
     onMouseMove(ev) {
-        console.log("CLASS: x: " + ev.clientX + " , y: " + ev.clientY);
+        console.log("Proto: x: " + ev.clientX + " , y: " + ev.clientY);
     }
     
     onMouseDown(ev) {

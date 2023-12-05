@@ -21,6 +21,7 @@ export class GlobeOptions {
     get drawEarthTexture() {
         return this.#drawEarthTexture;
     }
+
     get drawWireframe() {
         return this.#drawWireframe;
     }
