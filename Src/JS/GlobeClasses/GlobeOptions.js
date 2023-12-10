@@ -9,7 +9,7 @@ export class GlobeOptions {
     #drawWireframe = false;
     #drawEarthTexture = true;
     #ambientLight = true;
-    #pointLight = true;
+    #sunLight = true;
 
     constructor(options) {
 
@@ -28,8 +28,8 @@ export class GlobeOptions {
     get ambientLight() {
         return this.#ambientLight
     }
-    get pointLight() {
-        return this.#pointLight
+    get sunLight() {
+        return this.#sunLight
     }
     get imageMap() {
         return this.#mapImageFile;

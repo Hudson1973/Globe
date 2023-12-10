@@ -1,18 +1,26 @@
 import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
 
 export class GlobePainter {
     #renderer = null;
     #scene = null;
     #camera = null;
     #globe = null;
+    #controls = null;
 
-    constructor(canvas, options) {
+    // initial camera values
+
+
+    constructor(canvas, options, view) {
         console.log("GlobePainter.constructor()");
         this.#renderer = new THREE.WebGLRenderer({antialias: true, canvas: canvas});
+        document.body.appendChild( this.#renderer.domElement );
+
         this.#scene = new THREE.Scene();
 
         // Draw globe sphere
-        const earthGeometry = new THREE.SphereGeometry(6371, 32, 32);
+        const earthGeometry = new THREE.SphereGeometry(view.radius, 32, 32);
         const earthMaterial = new THREE.MeshPhongMaterial({
             //wireframe: true
         });
@@ -34,10 +42,10 @@ export class GlobePainter {
              const ambientlight = new THREE.AmbientLight(0xddddff, 0.08);
             this.#scene.add(ambientlight);
         }
-        if (options.pointLight) {
+        if (options.sunLight) {
             const pointLightColour = 0xffffdd;
             const pointerLight = new THREE.PointLight(pointLightColour, 0.9);
-            pointerLight.position.set(0,5000,15800);
+            pointerLight.position.set(0,5000,18800);
             this.#scene.add(pointerLight);
         }
 
@@ -45,17 +53,29 @@ export class GlobePainter {
         const aspect = canvas.width / canvas.height;  // the canvas default
         const near = 10;
         const far = 300000;
-        this.#camera = new THREE.PerspectiveCamera(46, aspect, near, far);
-        this.#camera.position.z = 35000;
-        
-        this.redrawScene();
+        this.#camera = new THREE.PerspectiveCamera(view.fieldOfView, aspect, near, far);
+        this.#camera.position.z = view.distance;
+
+        // Set up controls for orbits and flybys
+        this.#controls = new OrbitControls( this.#camera, this.#renderer.domElement );
+        this.#controls.autoRotate = false;
+        this.#controls.update();
+        console.log("End of GlobePainter constructor");
     }
+
+    AnimateScene() {
+        this.redrawScene();
+        this.#controls.update();
+        requestAnimationFrame( this.AnimateScene.bind(this));
+      };
 
     redrawScene() {
          this.#renderer.render( this.#scene, this.#camera );
     }
-    rotateGlobe(longitudeRotationAngle) {
+    rotateGlobe(longitudeRotationAngle, latitudeRotationAngle) {
         this.#globe.rotation.y += longitudeRotationAngle * Math.PI /180 ;
+
+        // Rotate camera around the x axis
         this.redrawScene();
     }
 }

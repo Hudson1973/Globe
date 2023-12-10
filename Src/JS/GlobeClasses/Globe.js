@@ -15,8 +15,10 @@ export default class Globe {
         console.log("Globe.constructor(canvas)");
         this.options = new GlobeOptions(optionParameters);
         this.solarSystemPhysics = new SolarSystemPhysics();
-        this.#globePainter = new GlobePainter(canvas, this.options);
         this.View = new EarthView(this.#globePainter);
+        this.#globePainter = new GlobePainter(canvas, this.options, this.View);
+        this.View.initGlobePainting(this.#globePainter);
+        this.#globePainter.AnimateScene();
         this.#eventController = new GlobeEventController(this.View);
     }
 

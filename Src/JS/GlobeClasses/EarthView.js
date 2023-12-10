@@ -12,11 +12,16 @@ export class EarthView {
 
     #globePainter = null;
 
-    constructor(painterReference){
+    constructor(){
         console.log("EarthView.constructor()");
-        console.log(painterReference);
-        this.#latitude = 56.7;
-        this.#longitude = 23.5;
+
+    }
+
+    initGlobePainting(painterReference) {
+        // Due to a chicken and egg situation, the GlobePainter object 
+        // needs to access camera distance from this EarthView object 
+        // to set up. Nonetheless, this EarthView object needs 
+        // GlobePainter in order to update the globe.
 
         // Set reference for repainting once  a transformation has happened
         this.#globePainter = painterReference;
@@ -52,7 +57,7 @@ export class EarthView {
         if (this.#latitude > 90) this.#latitude = 90;
 
         console.log("repaint");
-        this.#globePainter.rotateGlobe(longitude);
+        this.#globePainter.rotateGlobe(longitude, latitude);
     }
     rotateTo({ latitude, longitude }) {
 
