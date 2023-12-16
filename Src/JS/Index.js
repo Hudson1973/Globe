@@ -1,5 +1,5 @@
-import Globe from './Src/JS/GlobeClasses/Globe.js';
-import TextFormatHelpers from './Src/JS/GlobeClasses/TextFormatHelpers.js';
+import Globe from './GlobeClasses/Globe.js';
+import TextFormatHelpers from './GlobeClasses/TextFormatHelpers.js';
 
 // Add keydown listener
 document.addEventListener('keydown', e => keypressed(e)); 
@@ -10,8 +10,11 @@ cnvs.height = window.innerHeight;
 //const myGraphics = new GlobeGraphics(cnvs);
 //myGraphics.redrawScene();
 const myGlobe = new Globe(cnvs);
-document.getElementById("geoposition").innerHTML=TextFormatHelpers.latitudeGCS(myGlobe.View.latitude) + " " + TextFormatHelpers.longitudeGCS(myGlobe.View.longitude);
-updateDiagnostics()
+//document.getElementById("geoposition").innerHTML=TextFormatHelpers.latitudeGCS(myGlobe.View.latitude) 
+//    + " " + TextFormatHelpers.longitudeGCS(myGlobe.View.longitude);
+document.getElementById("geoposition").innerHTML=Math.floor(myGlobe.View.cameraPosition.x)
++ " " + Math.floor(myGlobe.View.cameraPosition.y) + " " + Math.floor(myGlobe.View.cameraPosition.z);
+updateDiagnostics();
 setInterval(updateDateTime, 1000);
 
 function keypressed(ev) {
@@ -29,13 +32,13 @@ function keypressed(ev) {
             break;
         case 'ArrowRight':
             //this.#rotateWest(ev.shiftKey);
-            document.getElementById("geoposition").innerHTML=TextFormatHelpers.latitudeGCS(myGlobe.View.latitude) + 
-                " " + TextFormatHelpers.longitudeGCS(myGlobe.View.longitude);
+            document.getElementById("geoposition").innerHTML=Math.floor(myGlobe.View.cameraPosition.x)
+            + " " + Math.floor(myGlobe.View.cameraPosition.y) + " " + Math.floor(myGlobe.View.cameraPosition.z);
             break;
         case 'ArrowLeft':
             //this.#rotateEast(ev.shiftKey);
-            document.getElementById("geoposition").innerHTML=TextFormatHelpers.latitudeGCS(myGlobe.View.latitude) + 
-                " " + TextFormatHelpers.longitudeGCS(myGlobe.View.longitude);
+            document.getElementById("geoposition").innerHTML=Math.floor(myGlobe.View.cameraPosition.x)
+            + " " + Math.floor(myGlobe.View.cameraPosition.y) + " " + Math.floor(myGlobe.View.cameraPosition.z);
             break;
         case '+':
             updateDiagnostics()

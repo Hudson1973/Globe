@@ -1,9 +1,10 @@
 import TimestampToAngle from './GlobeSunRotation.js';  
 
-export class SolarSystemPhysics {
+export class SolarSystemConstants {
     #sunAngle = TimestampToAngle(Date.now());
     #earthAxis = 23.45;
     #sunDistance = 148880000;
+    #earthRadius = 6371;
     #cartesianSunPosition = {
         x: 0,
         y: 0,
@@ -21,19 +22,19 @@ export class SolarSystemPhysics {
         return this.#sunAngle;
     }
 
-    get sunDistance() {
-        return this.#sunDistance;
+    static get sunDistance() {
+        return 148880000;   // In KM
     }
 
-    get earthAxis() {
-        return this.#earthAxis;
+    static get earthAxis() {
+        return 23.45;       // in degrees
     }
 
     get sunPosition() {
         return this.#cartesianSunPosition;
     }
 
-    get earthRadius() {
-        return this.#cartesianSunPosition;
+    static get earthRadius() {
+        return 6371;        // In KM
     }
 }

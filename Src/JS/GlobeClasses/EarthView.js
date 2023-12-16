@@ -11,6 +11,11 @@ export class EarthView {
     #distance = 35000;
 
     #globePainter = null;
+    #cameraPosition = {
+        x: 0,
+        y: 0,
+        z: 0
+    };
 
     constructor(){
         console.log("EarthView.constructor()");
@@ -28,22 +33,18 @@ export class EarthView {
     }
 
     get latitude() {
-        console.log("EarthView get Latitude()");
         return this.#latitude;
     }
     get longitude() {
-        console.log("EarthView get Longitude()");
         return this.#longitude;
     }
     get radius() {
-        console.log("EarthView get radius()");
         return this.#radius;
     }
     get fieldOfView() {
         return this.#FOV;
     }
     get distance() {
-        console.log("EarthView get distance()");
         return this.#distance;
     }
 
@@ -56,7 +57,6 @@ export class EarthView {
         if (this.#latitude < -90) this.#latitude = -90;
         if (this.#latitude > 90) this.#latitude = 90;
 
-        console.log("repaint");
         this.#globePainter.rotateGlobe(longitude, latitude);
     }
     rotateTo({ latitude, longitude }) {
@@ -85,5 +85,14 @@ export class EarthView {
             latitude: 0,
             longitude: 1
         });
+    }
+
+    updatePosition (cameraPosition) {
+        if(cameraPosition) {
+            this.#cameraPosition = cameraPosition;
+        }
+    }
+    get cameraPosition() {
+        return this.#cameraPosition;
     }
 }

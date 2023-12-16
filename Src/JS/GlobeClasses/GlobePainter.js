@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
+import {SolarSystemConstants} from './SolarSystemConstants.js'
 
 export class GlobePainter {
     #renderer = null;
@@ -8,19 +8,22 @@ export class GlobePainter {
     #camera = null;
     #globe = null;
     #controls = null;
+    #earthView = null;
 
     // initial camera values
 
 
     constructor(canvas, options, view) {
         console.log("GlobePainter.constructor()");
+        this.#earthView = view;
+
         this.#renderer = new THREE.WebGLRenderer({antialias: true, canvas: canvas});
         document.body.appendChild( this.#renderer.domElement );
 
         this.#scene = new THREE.Scene();
 
         // Draw globe sphere
-        const earthGeometry = new THREE.SphereGeometry(view.radius, 32, 32);
+        const earthGeometry = new THREE.SphereGeometry(SolarSystemConstants.earthRadius, 32, 32);
         const earthMaterial = new THREE.MeshPhongMaterial({
             //wireframe: true
         });
@@ -66,6 +69,7 @@ export class GlobePainter {
     AnimateScene() {
         this.redrawScene();
         this.#controls.update();
+        this.#earthView.updatePosition(this.#camera.position);
         requestAnimationFrame( this.AnimateScene.bind(this));
       };
 
