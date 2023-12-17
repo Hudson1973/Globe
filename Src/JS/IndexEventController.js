@@ -1,5 +1,5 @@
 import { InputEventController } from './GlobeClasses/Proto/InputEventController.js';
-
+import TextFormatHelpers from './GlobeClasses/TextFormatHelpers.js';
 
 export class IndexEventController extends InputEventController {
     #globe = null;
@@ -14,7 +14,6 @@ export class IndexEventController extends InputEventController {
     onKeyPress(ev) {
         console.log("ndexEventController onKeyPress");
 
-            // SHIFT key pressed should do bigger changes than without
         switch (ev.key) {
             case 'ArrowUp':
                 console.log("Outside->UP");
@@ -45,6 +44,7 @@ export class IndexEventController extends InputEventController {
 
     onDrag(delta) {
         this.updateScreenCoordinates();
+        this.updateGeocentricCoordinates();
     }
 
     updateScreenCoordinates() {
@@ -52,5 +52,9 @@ export class IndexEventController extends InputEventController {
             " x:" + Math.floor(this.#globe.View.cameraPosition.x) + 
             " y:" + Math.floor(this.#globe.View.cameraPosition.y) + 
             " z:" + Math.floor(this.#globe.View.cameraPosition.z);
+    }
+    updateGeocentricCoordinates() {
+        document.getElementById("geoposition").innerHTML=TextFormatHelpers.latitudeGCS(this.#globe.View.latitude) 
+        + " " + TextFormatHelpers.longitudeGCS(this.#globe.View.longitude);
     }
 }

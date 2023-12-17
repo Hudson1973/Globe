@@ -10,9 +10,9 @@ export default class TextFormatHelpers  {
         const positiveWholeDegree = Math.abs(wholeDegree);
         let suffix = '';
         if (wholeDegree < 0) {
-            suffix = 'N';
-        } else if (wholeDegree > 0) {
             suffix = 'S';
+        } else if (wholeDegree > 0) {
+            suffix = 'N';
         } else {
             suffix = '';
         }

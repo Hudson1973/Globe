@@ -40,6 +40,18 @@ export class GlobeEventController extends InputEventController {
         }
     }
 
+    onMouseWheel(ev) {
+        // mouse wheel changes distance on Orbit controls 
+        // So we need to reset Distance when this happens.
+        this.#view.updateDistance();
+
+    }
+    onDrag(delta) {
+        console.log("GlobeEventController onDrag: " + delta.x + ":" + delta.y);
+
+        this.#view.convertCameraCartesianToGeocentric();
+    }
+
 }
 
 /*function setInputEvents (canvas) {

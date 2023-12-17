@@ -19,9 +19,7 @@ export class EarthView {
 
     constructor(){
         console.log("EarthView.constructor()");
-
     }
-
     initGlobePainting(painterReference) {
         // Due to a chicken and egg situation, the GlobePainter object 
         // needs to access camera distance from this EarthView object 
@@ -33,10 +31,10 @@ export class EarthView {
     }
 
     get latitude() {
-        return this.#latitude;
+        return Math.round(this.#latitude);
     }
     get longitude() {
-        return this.#longitude;
+        return Math.round(this.#longitude);
     }
     get radius() {
         return this.#radius;
@@ -46,6 +44,9 @@ export class EarthView {
     }
     get distance() {
         return this.#distance;
+    }
+    get cameraPosition() {
+        return this.#cameraPosition;
     }
 
     rotateBy({ latitude, longitude }) {
@@ -92,7 +93,30 @@ export class EarthView {
             this.#cameraPosition = cameraPosition;
         }
     }
-    get cameraPosition() {
-        return this.#cameraPosition;
+    updateDistance() {
+        // This assumes that this.#cameraPosition is up to date
+
+        // Distance calculation is hypoteneuse.
+        //=SQRT(position.x^2 + position.y^2 + position.z^2)
+        this.#distance = 
+            Math.sqrt(Math.pow(this.#cameraPosition.x,2) + 
+            Math.pow(this.#cameraPosition.y,2) + 
+            Math.pow(this.#cameraPosition.z,2));
+        
+        console.log("Distance is now " + this.#distance + " Km");
+    }
+
+
+
+    convertCameraCartesianToGeocentric() {
+        // Take camera coodinates looking at the origin of the globe and
+        // return the geocentric coordinates (latitude & longitude) at the 
+        // tangent of the surface of the globe to the camera.
+
+        // latitude angle = inverse sin(opp / Hypotenuese)
+        // latitude angle = inverse sin(camera y position / distance)
+        this.#latitude = Math.asin(this.cameraPosition.y / this.#distance);
+        this.#latitude *= 180 / Math.PI;        // convert to degrees
+        console.log("Y = " + Math.floor(this.cameraPosition.y) + " Latitude = " + Math.round(this.#latitude));
     }
 }
