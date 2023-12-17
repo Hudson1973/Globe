@@ -1,5 +1,16 @@
 
 class InputEventController {
+    screenTouched = false;
+    dragging = false;
+    initialTouchtime = new Date();
+    start = {
+        x: 0,
+        y: 0
+    };
+    latest = {
+        x: 0,
+        y: 0
+    };
 
     constructor () {
         // keydown event listener
@@ -25,36 +36,58 @@ class InputEventController {
     }
     
     onMouseMove(ev) {
-        console.log("Proto: x: " + ev.clientX + " , y: " + ev.clientY);
+        if (this.screenTouched) {
+            const delta = {
+                x: ev.clientX - this.latest.x,
+                y: ev.clientY - this.latest.y
+            }
+            this.latest.x = ev.clientX;
+            this.latest.y = ev.clientY;
+
+            if(delta.x != 0 || delta.y != 0) {
+                // Then we are dragging
+                this.onDrag(delta);
+            }
+        }
     }
     
     onMouseDown(ev) {
-        this.hitScreen(ev.clientX, ev.clientY);
+        this.screenTouched = true;
+        this.initialTouchtime = Date.now();
+        this.latest = {
+            x: ev.clientX,
+            y: ev.clientY
+        }
+        this.start = this.latest;
     }
     
     onMouseUp(ev) {
-    
+        this.screenTouched = false;
+        this.dragging = false;
     }
     
     onTouchStart(ev) {
         ev.preventDefault();            // Prevent more touch (or mouse) events from being processed
+
         const touches = ev.touches;
         console.log("CLASS: Touch started with " + touches.length + " touches");
         if (touches.length === 1){
             // Poke, stroke or swipe
-            this.hitScreen(touches[0].clientX, touches[0].clientY);
+            this.screenTouched = true;
+            this.initialTouchtime = Date.now();
+            this.latest.x = ev.touches[0].clientX;
+            this.latest.y = ev.touches[0].clientY;
         }
         else {
             // Pinch or flex
             for(let i = 0; i < touches.length; i++)
             this.processTouch(touches[i]);
         }
-
-        
     }
     
     onTouchEnd(ev) {
-    
+        this.screenTouched = false;
+        this.dragging = false;
     }
     
     onTouchCancel(ev) {
@@ -62,7 +95,19 @@ class InputEventController {
     }
     
     onTouchMove(ev) {
-    
+        if (this.screenTouched) {
+            const delta = {
+                x: ev.touches[0].clientX - this.latest.x,
+                y: ev.touches[0].clientY - this.latest.y
+            }
+            this.latest.x = ev.touches[0].clientX;
+            this.latest.y = ev.touches[0].clientY;
+
+            if(delta.x != 0 || delta.y != 0) {
+                // Then we are dragging
+                this.onDrag(delta);
+            }
+        }
     }
     
     onMouseWheel(ev) {
@@ -76,6 +121,10 @@ class InputEventController {
 
     hitScreen(x,y) {
         console.log("CLASS: Hit screen at " + Math.floor(x) + ", " + Math.floor(y));
+    }
+
+    onDrag(delta) {
+        console.log("Dragging x:" + delta.x + " y:" + delta.y);
     }
 }
 

@@ -82,7 +82,10 @@ h1 {
 #datetimenow {
 	top: 17vmin;
 }
-
+#cameraPosition {
+    right: 0;
+	top: 17vmin;
+}
 #earthView {
     bottom: 0;
 

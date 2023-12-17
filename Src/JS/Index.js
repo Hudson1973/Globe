@@ -1,59 +1,19 @@
 import Globe from './GlobeClasses/Globe.js';
 import TextFormatHelpers from './GlobeClasses/TextFormatHelpers.js';
+import { IndexEventController } from './IndexEventController.js';
 
 // Add keydown listener
-document.addEventListener('keydown', e => keypressed(e)); 
 let cnvs = document.getElementById("globeCanvas");
 cnvs.width = window.innerWidth;
 cnvs.height = window.innerHeight;
 
-//const myGraphics = new GlobeGraphics(cnvs);
-//myGraphics.redrawScene();
 const myGlobe = new Globe(cnvs);
-//document.getElementById("geoposition").innerHTML=TextFormatHelpers.latitudeGCS(myGlobe.View.latitude) 
-//    + " " + TextFormatHelpers.longitudeGCS(myGlobe.View.longitude);
-document.getElementById("geoposition").innerHTML=Math.floor(myGlobe.View.cameraPosition.x)
-+ " " + Math.floor(myGlobe.View.cameraPosition.y) + " " + Math.floor(myGlobe.View.cameraPosition.z);
+document.getElementById("geoposition").innerHTML=TextFormatHelpers.latitudeGCS(myGlobe.View.latitude) 
+    + " " + TextFormatHelpers.longitudeGCS(myGlobe.View.longitude);
+
 updateDiagnostics();
 setInterval(updateDateTime, 1000);
-
-function keypressed(ev) {
-    //console.log(this , ev);
-
-    // SHIFT key pressed should do bigger changes than without
-    switch (ev.key) {
-        case 'ArrowUp':
-            //this.#rotateNorth(ev.shiftKey);
-            console.log("Outside->UP");
-            break;
-        case 'ArrowDown':
-            //this.#rotateSouth(ev.shiftKey);
-            console.log("Outside->Down");
-            break;
-        case 'ArrowRight':
-            //this.#rotateWest(ev.shiftKey);
-            document.getElementById("geoposition").innerHTML=Math.floor(myGlobe.View.cameraPosition.x)
-            + " " + Math.floor(myGlobe.View.cameraPosition.y) + " " + Math.floor(myGlobe.View.cameraPosition.z);
-            break;
-        case 'ArrowLeft':
-            //this.#rotateEast(ev.shiftKey);
-            document.getElementById("geoposition").innerHTML=Math.floor(myGlobe.View.cameraPosition.x)
-            + " " + Math.floor(myGlobe.View.cameraPosition.y) + " " + Math.floor(myGlobe.View.cameraPosition.z);
-            break;
-        case '+':
-            updateDiagnostics()
-            break;
-        case '-':
-            updateDiagnostics()
-            break;
-        case '=':
-            updateDiagnostics()
-            break;
-        case '_':
-            updateDiagnostics();
-            break;
-}
-}
+const myController = new IndexEventController(myGlobe);
 
 function updateDateTime() {
         const nowDateTime = new Date();
