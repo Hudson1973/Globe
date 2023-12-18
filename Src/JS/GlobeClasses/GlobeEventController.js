@@ -51,6 +51,9 @@ export class GlobeEventController extends InputEventController {
 
         this.#view.convertCameraCartesianToGeocentric();
     }
+    onPinchFlex(touches) {
+        this.#view.updateDistance();
+    }
 
 }
 

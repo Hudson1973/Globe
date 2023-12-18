@@ -113,10 +113,53 @@ export class EarthView {
         // return the geocentric coordinates (latitude & longitude) at the 
         // tangent of the surface of the globe to the camera.
 
-        // latitude angle = inverse sin(opp / Hypotenuese)
-        // latitude angle = inverse sin(camera y position / distance)
+        //    latitude angle = inverse sin(opp / Hypotenuese)
+        //    latitude angle = inverse sin(camera y position / distance)
+        //
+        // IMPORTANT - THIS ASSUMES THE GLOBE IS A PERFECT SPHERE
         this.#latitude = Math.asin(this.cameraPosition.y / this.#distance);
         this.#latitude *= 180 / Math.PI;        // convert to degrees
+    
+        // Longtitude calculation will use Earth-centered, Earth-fixed (ECEF)
+        // system to convert to geodetic coordinates (latitude and longitude)
+        // 
+        // ECEF coordinates are cartesian coordinates that track sateallites 
+        // and things on or inside the earth that can't be represented via
+        // geodetic coordinates. This assumes:
+        //
+        //     x axis interescts the Greenwich (prime) meridian through the 
+        //            centre of the globe at origin and through the 180 degree
+        //            meridian at the international date line.
+        //     y axis intersects at 90 degreess to the x axis (between 90 West 
+        //            and 90 East through the earths centre).
+        //     z axis from pole to pole through the rotation of the Earth.
+        //
+        // This is different to the three.js coordinate system. SO effectively:
+        //
+        //     ECEF x axis = three.js z axis
+        //     ECEF y axis = three.js x axis
+        //     ECEF z axis = three.js y axis
+        //
+        //     More info about ECEF to geodetic coordinates at:
+        //     https://uk.mathworks.com/help/aeroblks/ecefpositiontolla.html
+        //
+        //    Longitude angle = inverse tan( Px / Py)
+        //    Longitude angle = inverse tan ( camera z posiotion / camera x position )
+        this.#longitude = Math.atan(this.cameraPosition.z / this.cameraPosition.x);
+        this.#longitude *= 180 / Math.PI;        // convert to degrees
+        if (this.#cameraPosition.x > 0) {
+            this.#longitude *= -1;
+        } else {
+            if (this.cameraPosition.z < 0) {
+                this.#longitude = 90 + (90 - this.#longitude);
+            } else {
+                this.#longitude *= -1;
+                this.#longitude -= 180;
+            }
+        }
+
         console.log("Y = " + Math.floor(this.cameraPosition.y) + " Latitude = " + Math.round(this.#latitude));
+        console.log("X: " + Math.floor(this.cameraPosition.x) + " Z: " + Math.floor(this.cameraPosition.z) 
+            + " Longitude: " + Math.round(this.#longitude));
     }
 }

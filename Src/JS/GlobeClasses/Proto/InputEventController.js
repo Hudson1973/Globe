@@ -80,8 +80,7 @@ class InputEventController {
         }
         else {
             // Pinch or flex
-            for(let i = 0; i < touches.length; i++)
-            this.processTouch(touches[i]);
+            this.onPinchFlex(touches);
         }
     }
     
@@ -125,6 +124,10 @@ class InputEventController {
 
     onDrag(delta) {
         console.log("Dragging x:" + delta.x + " y:" + delta.y);
+    }
+    onPinchFlex(touches) {
+        for(let i = 0; i < touches.length; i++)
+        this.processTouch(touches[i]);
     }
 }
 

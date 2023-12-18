@@ -46,7 +46,12 @@ export class IndexEventController extends InputEventController {
         this.updateScreenCoordinates();
         this.updateGeocentricCoordinates();
     }
-
+    onMouseWheel(ev) {
+        this.updateDistance();
+    }
+    onPinchFlex(touches) {
+        this.updateDistance();
+    }
     updateScreenCoordinates() {
         document.getElementById("cameraPosition").innerHTML="Camera position" + 
             " x:" + Math.floor(this.#globe.View.cameraPosition.x) + 
@@ -56,5 +61,9 @@ export class IndexEventController extends InputEventController {
     updateGeocentricCoordinates() {
         document.getElementById("geoposition").innerHTML=TextFormatHelpers.latitudeGCS(this.#globe.View.latitude) 
         + " " + TextFormatHelpers.longitudeGCS(this.#globe.View.longitude);
+    }
+    updateDistance() {
+        document.getElementById("earthView").innerHTML="Radius: " + this.#globe.View.radius + "km<br>Field of view: " 
+        + this.#globe.View.fieldOfView + TextFormatHelpers.degreeSymbol() + "<br>Distance: " + Math.round(this.#globe.View.distance) + "km";
     }
 }
