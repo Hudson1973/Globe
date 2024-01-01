@@ -10,6 +10,7 @@ export class GlobeOptions {
     #drawEarthTexture = true;
     #ambientLight = true;
     #sunLight = true;
+    #mapImageLongRotation = 160;
 
     constructor(options) {
 
@@ -37,5 +38,7 @@ export class GlobeOptions {
     get bumpMap() {
         return this.#mapBumpFile;
     }
-
+    get GreenwichOffset() {
+        return this.#mapImageLongRotation;
+    }
 }

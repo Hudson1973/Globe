@@ -49,6 +49,9 @@ export class IndexEventController extends InputEventController {
     onMouseWheel(ev) {
         this.updateDistance();
     }
+    onTouchEnd(ev) {
+        this.updateDistance();
+    }
     onPinchFlex(touches) {
         this.updateDistance();
     }

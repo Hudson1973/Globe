@@ -87,10 +87,12 @@ class InputEventController {
     onTouchEnd(ev) {
         this.screenTouched = false;
         this.dragging = false;
+
+        console.log("PROTO: Touch ended");
     }
     
     onTouchCancel(ev) {
-    
+        console.log("PROTO: Touch cancelled");
     }
     
     onTouchMove(ev) {

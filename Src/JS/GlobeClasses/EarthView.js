@@ -147,6 +147,7 @@ export class EarthView {
         //    Longitude angle = inverse tan ( camera z posiotion / camera x position )
         this.#longitude = Math.atan(this.cameraPosition.z / this.cameraPosition.x);
         this.#longitude *= 180 / Math.PI;        // convert to degrees
+        // Do some buggery pokery to convert it from -90 -> +90 twice to -180 -> +180
         if (this.#cameraPosition.x > 0) {
             this.#longitude *= -1;
         } else {

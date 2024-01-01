@@ -14,16 +14,16 @@ export class GlobeEventController extends InputEventController {
 
         switch (ev.key) {
             case 'ArrowUp':
-                this.#view.rotateNorth();
+                //this.#view.rotateNorth();
                 break;
             case 'ArrowDown':
-                this.#view.rotateSouth();
+                //this.#view.rotateSouth();
                 break;
             case 'ArrowRight':
-                this.#view.rotateEast();
+                //this.#view.rotateEast();
                 break;
             case 'ArrowLeft':
-                this.#view.rotateWest();
+                //this.#view.rotateWest();
                 break;
             case '=':
                 // Dolly in
@@ -46,6 +46,12 @@ export class GlobeEventController extends InputEventController {
         this.#view.updateDistance();
 
     }
+    onTouchEnd(ev) {
+        // screen touch changes distance on Orbit controls 
+        // So we need to reset Distance when this happens.
+        this.#view.updateDistance();
+    }
+
     onDrag(delta) {
         console.log("GlobeEventController onDrag: " + delta.x + ":" + delta.y);
 
@@ -109,9 +115,7 @@ function onTouchStart(ev) {
     console.log("I was touched " + this.numberOfFingers + " times!");
 }
 
-function onTouchEnd(ev) {
-    
-}
+
 
 function onTouchCancel(ev) {
     
