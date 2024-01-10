@@ -10,7 +10,7 @@ export class GlobeOptions {
     #drawEarthTexture = true;
     #ambientLight = true;
     #sunLight = true;
-    #mapImageLongRotation = 160;
+    #mapImageLongRotation = 90;
 
     constructor(options) {
 

@@ -34,13 +34,13 @@ export class GlobePainter {
             earthMaterial.setValues({
                 map: earthTexture,
                 bumpMap: earthBumps,
-                bumpScale: 200.0
+                bumpScale: 160.0
             });
         }
         this.#globe = new THREE.Mesh(earthGeometry, earthMaterial);
         this.#scene.add(this.#globe);
-        // Rotate to 0 degrees Greenwich meantime
-        this.#globe.rotation.y = Math.PI + (options.GreenwichOffset * Math.PI /180 );
+
+
 
         // Shine a light on it   
         if (options.ambientLight) {
@@ -66,6 +66,11 @@ export class GlobePainter {
         this.#controls.autoRotate = false;
         this.#controls.enablePan = false;
         this.#controls.update();
+
+        // Rotate to 0 degrees longitude, Greenwich meantime
+        //this.#globe.rotation.y = Math.PI + (options.GreenwichOffset * Math.PI /180 );
+        this.rotateAroundGlobeTo(options.GreenwichOffset,52);
+
         console.log("End of GlobePainter constructor");
     }
 
@@ -80,9 +85,32 @@ export class GlobePainter {
          this.#renderer.render( this.#scene, this.#camera );
     }
     rotateGlobe(longitudeRotationAngle, latitudeRotationAngle) {
+        // This rotates the actual globe, hence changingh time
         this.#globe.rotation.y += longitudeRotationAngle * Math.PI /180 ;
 
         // Rotate camera around the x axis
+        this.redrawScene();
+    }
+    rotateAroundGlobeTo(longitudeRotationAngle, latitudeRotationAngle) {
+        // This roatets the camera AROUND the globe, hence just flying around
+        // the globe to a particular point.
+        //
+        // Yes, you would normally use OrbitControls, but you can't go to a 
+        // specific point of latitude and longitude. With this mathod you can
+
+        // Update the latitude and longitude
+        //this.#earthView.longitude = longitudeRotationAngle;
+        //this.#earthView.latitude = latitudeRotationAngle;
+
+        // First, rotate to longitude
+        this.#camera.position.x = this.#earthView.distance * Math.sin(longitudeRotationAngle * Math.PI /180);
+        this.#camera.position.z = this.#earthView.distance * Math.cos(longitudeRotationAngle * Math.PI /180);
+
+        // Then, rotate latitude0
+        this.#camera.position.x *= Math.cos(latitudeRotationAngle * Math.PI /180);
+        this.#camera.position.y = this.#earthView.distance * Math.sin(latitudeRotationAngle * Math.PI /180);
+        this.#camera.position.z *= Math.cos(latitudeRotationAngle * Math.PI /180);
+
         this.redrawScene();
     }
 }

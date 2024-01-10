@@ -33,8 +33,16 @@ export class EarthView {
     get latitude() {
         return Math.round(this.#latitude);
     }
+    set latitude(lat) {
+        if (lat < -90 || lat > 90) throw new Error("Latitude value out of bounds (-90 to 90)");
+        this.latitude = lat;
+    }
     get longitude() {
         return Math.round(this.#longitude);
+    }
+    set longitude(long) {
+        if (long < -180 || long > 180) throw new Error("Longitude value out of bounds (-180 to 180)");
+        this.longitude = long;
     }
     get radius() {
         return this.#radius;
@@ -43,6 +51,7 @@ export class EarthView {
         return this.#FOV;
     }
     get distance() {
+        // Distance to origin of the globe, not to the surface
         return this.#distance;
     }
     get cameraPosition() {
